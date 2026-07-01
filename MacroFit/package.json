@@ -2,6 +2,9 @@
   "name": "macrofit",
   "version": "1.0.0",
   "main": "index.js",
+  "overrides": {
+    "expo-font": "14.0.12"
+  },
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
