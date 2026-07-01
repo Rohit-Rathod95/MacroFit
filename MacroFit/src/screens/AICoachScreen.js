@@ -6,11 +6,11 @@ import {
 	TouchableOpacity,
 	FlatList,
 	StyleSheet,
-	SafeAreaView,
 	ActivityIndicator,
 	KeyboardAvoidingView,
 	Platform,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useApp } from '../context/AppContext';
 import { askAICoach, generateWeeklyDietPlan } from '../utils/geminiApi';
 import { computeWeeklyDietBudget } from '../utils/dietBudget';

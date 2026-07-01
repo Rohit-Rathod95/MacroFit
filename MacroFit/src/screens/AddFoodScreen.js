@@ -6,8 +6,8 @@ import {
 	TouchableOpacity,
 	FlatList,
 	StyleSheet,
-	SafeAreaView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useApp } from '../context/AppContext';
 import { searchFoods, scaleFood } from '../utils/foodDatabase';

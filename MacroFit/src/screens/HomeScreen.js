@@ -1,12 +1,12 @@
 import React from 'react';
 import {
-	SafeAreaView,
 	View,
 	Text,
 	ScrollView,
 	StyleSheet,
 	TouchableOpacity,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useApp } from '../context/AppContext';
 import MacroProgressBar from '../components/MacroProgressBar';

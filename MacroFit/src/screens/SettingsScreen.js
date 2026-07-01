@@ -6,12 +6,12 @@ import {
 	TouchableOpacity,
 	ScrollView,
 	StyleSheet,
-	SafeAreaView,
 	Switch,
 	Alert,
 	Linking,
 	Platform,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useApp } from '../context/AppContext';
 import { ACTIVITY_LEVELS, GOALS } from '../utils/calculations';
 import { Ionicons } from '@expo/vector-icons';

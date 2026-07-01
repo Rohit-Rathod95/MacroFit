@@ -6,9 +6,9 @@ import {
 	TouchableOpacity,
 	ScrollView,
 	StyleSheet,
-	SafeAreaView,
 	Dimensions,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useApp } from '../context/AppContext';
 import SimpleLineChart from '../components/SimpleLineChart';
 import { todayKey, addDays } from '../utils/calculations';

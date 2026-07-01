@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppProvider, useApp } from './src/context/AppContext';
 import OnboardingScreen from './src/screens/OnboardingScreen';
 import HomeScreen from './src/screens/HomeScreen';
@@ -30,13 +31,18 @@ function HomeStack() {
   );
 }
 
-function MainTabs() {
+function MainTabs({ insets }) {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarActiveTintColor: '#4F46E5',
         tabBarInactiveTintColor: '#94A3B8',
+        tabBarStyle: {
+          height: 56 + insets.bottom,
+          paddingBottom: insets.bottom > 0 ? insets.bottom : 8,
+          paddingTop: 8,
+        },
         tabBarIcon: ({ focused, color, size }) => {
           if (route.name === 'Home') {
             return (
@@ -90,6 +96,11 @@ function MainTabs() {
   );
 }
 
+function AppTabs() {
+  const insets = useSafeAreaInsets();
+  return <MainTabs insets={insets} />;
+}
+
 function AppContent() {
   const { loading, profile } = useApp();
 
@@ -107,17 +118,19 @@ function AppContent() {
 
   return (
     <NavigationContainer>
-      <MainTabs />
+      <AppTabs />
     </NavigationContainer>
   );
 }
 
 export default function App() {
   return (
-    <AppProvider>
-      <AppContent />
-      <StatusBar style="auto" />
-    </AppProvider>
+    <SafeAreaProvider>
+      <AppProvider>
+        <AppContent />
+        <StatusBar style="auto" />
+      </AppProvider>
+    </SafeAreaProvider>
   );
 }
 
