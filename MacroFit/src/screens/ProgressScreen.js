@@ -12,8 +12,8 @@ import {
 import { useApp } from '../context/AppContext';
 import SimpleLineChart from '../components/SimpleLineChart';
 import { todayKey, addDays } from '../utils/calculations';
-
-const PRIMARY = '#4F46E5';
+import { Ionicons } from '@expo/vector-icons';
+import { theme } from '../theme/theme';
 
 function formatDateLabel(date) {
 	if (!date) {
@@ -47,7 +47,6 @@ export default function ProgressScreen() {
 	const netChange = hasTrend
 		? (Number(currentEntry?.weightKg) || 0) - (Number(startingEntry?.weightKg) || 0)
 		: 0;
-	const changeLabel = netChange < 0 ? `${Math.abs(netChange).toFixed(1)} kg lost` : `${Math.abs(netChange).toFixed(1)} kg gained`;
 
 	const onSaveWeight = async () => {
 		const parsed = Number(weightInput);
@@ -66,17 +65,19 @@ export default function ProgressScreen() {
 
 				<View style={styles.card}>
 					<Text style={styles.cardTitle}>Log Today's Weight</Text>
-					<TextInput
-						style={styles.input}
-						keyboardType="numeric"
-						placeholder="Weight in kg"
-						placeholderTextColor="#94A3B8"
-						value={weightInput}
-						onChangeText={setWeightInput}
-					/>
-					<TouchableOpacity style={styles.saveButton} onPress={onSaveWeight}>
-						<Text style={styles.saveButtonText}>Save</Text>
-					</TouchableOpacity>
+					<View style={styles.inputGroup}>
+						<TextInput
+							style={styles.combinedInput}
+							keyboardType="numeric"
+							placeholder="Weight in kg"
+							placeholderTextColor={theme.colors.textMuted}
+							value={weightInput}
+							onChangeText={setWeightInput}
+						/>
+						<TouchableOpacity style={styles.combinedSaveButton} onPress={onSaveWeight}>
+							<Ionicons name="checkmark" size={20} color="#FFFFFF" />
+						</TouchableOpacity>
+					</View>
 				</View>
 
 				<View style={styles.card}>
@@ -85,15 +86,23 @@ export default function ProgressScreen() {
 
 					{hasTrend ? (
 						<View style={styles.summaryWrap}>
-							<View style={styles.summaryItem}>
+							<View style={styles.summaryCardItem}>
+								<Ionicons name="body-outline" size={16} color={theme.colors.primary} style={styles.statIcon} />
 								<Text style={styles.summaryLabel}>Current</Text>
 								<Text style={styles.summaryValue}>{Number(currentEntry?.weightKg || 0).toFixed(1)} kg</Text>
 							</View>
-							<View style={styles.summaryItem}>
+							<View style={styles.summaryCardItem}>
+								<Ionicons name="flag-outline" size={16} color={theme.colors.primary} style={styles.statIcon} />
 								<Text style={styles.summaryLabel}>Starting</Text>
 								<Text style={styles.summaryValue}>{Number(startingEntry?.weightKg || 0).toFixed(1)} kg</Text>
 							</View>
-							<View style={styles.summaryItem}>
+							<View style={styles.summaryCardItem}>
+								<Ionicons
+									name={netChange <= 0 ? 'trending-down-outline' : 'trending-up-outline'}
+									size={16}
+									color={netChange <= 0 ? theme.colors.accent : theme.colors.danger}
+									style={styles.statIcon}
+								/>
 								<Text style={styles.summaryLabel}>Net Change</Text>
 								<Text
 									style={[
@@ -136,120 +145,121 @@ export default function ProgressScreen() {
 const styles = StyleSheet.create({
 	safeArea: {
 		flex: 1,
-		backgroundColor: '#F8FAFC',
+		backgroundColor: theme.colors.background,
 	},
 	content: {
-		padding: 16,
-		paddingBottom: 28,
+		padding: theme.spacing.md,
+		paddingBottom: theme.spacing.xl,
 	},
 	title: {
-		fontSize: 30,
-		fontWeight: '800',
-		color: '#0F172A',
-		marginBottom: 16,
+		...theme.typography.h1,
+		color: theme.colors.textPrimary,
+		marginBottom: theme.spacing.md,
 	},
 	card: {
-		backgroundColor: '#FFFFFF',
-		borderRadius: 16,
-		padding: 16,
-		marginBottom: 14,
-		shadowColor: '#0F172A',
-		shadowOpacity: 0.06,
-		shadowOffset: { width: 0, height: 6 },
-		shadowRadius: 10,
-		elevation: 2,
+		backgroundColor: theme.colors.surface,
+		borderRadius: theme.radius.lg,
+		padding: theme.spacing.md,
+		marginBottom: theme.spacing.md,
+		...theme.shadow.card,
 	},
 	cardTitle: {
-		fontSize: 18,
-		fontWeight: '800',
-		color: '#0F172A',
-		marginBottom: 12,
+		...theme.typography.h2,
+		color: theme.colors.textPrimary,
+		marginBottom: theme.spacing.sm,
 	},
-	input: {
+	inputGroup: {
+		flexDirection: 'row',
+		alignItems: 'center',
 		height: 48,
-		borderRadius: 12,
+		borderRadius: theme.radius.pill,
 		borderWidth: 1,
-		borderColor: '#CBD5E1',
-		paddingHorizontal: 14,
-		fontSize: 15,
-		color: '#0F172A',
-		backgroundColor: '#FFFFFF',
+		borderColor: theme.colors.border,
+		backgroundColor: theme.colors.surface,
+		overflow: 'hidden',
+		marginTop: theme.spacing.xs,
 	},
-	saveButton: {
-		marginTop: 12,
-		height: 48,
-		borderRadius: 12,
-		backgroundColor: PRIMARY,
+	combinedInput: {
+		flex: 1,
+		height: '100%',
+		paddingHorizontal: theme.spacing.md,
+		...theme.typography.body,
+		color: theme.colors.textPrimary,
+	},
+	combinedSaveButton: {
+		width: 48,
+		height: '100%',
+		backgroundColor: theme.colors.primary,
 		alignItems: 'center',
 		justifyContent: 'center',
-	},
-	saveButtonText: {
-		fontSize: 15,
-		fontWeight: '800',
-		color: '#FFFFFF',
 	},
 	summaryWrap: {
 		flexDirection: 'row',
 		justifyContent: 'space-between',
-		marginTop: 10,
-		gap: 10,
-		flexWrap: 'wrap',
+		marginTop: theme.spacing.md,
+		gap: theme.spacing.sm,
 	},
-	summaryItem: {
-		flexGrow: 1,
-		minWidth: 92,
-		padding: 10,
-		borderRadius: 12,
-		backgroundColor: '#F8FAFC',
+	summaryCardItem: {
+		flex: 1,
+		minWidth: 85,
+		paddingVertical: theme.spacing.sm,
+		paddingHorizontal: theme.spacing.xs,
+		borderRadius: theme.radius.md,
+		backgroundColor: theme.colors.surface,
+		alignItems: 'center',
+		justifyContent: 'center',
 		borderWidth: 1,
-		borderColor: '#E2E8F0',
+		borderColor: theme.colors.border,
+		...theme.shadow.card,
+	},
+	statIcon: {
+		marginBottom: theme.spacing.xs,
 	},
 	summaryLabel: {
-		fontSize: 12,
-		fontWeight: '700',
-		color: '#64748B',
-		marginBottom: 4,
+		...theme.typography.caption,
+		color: theme.colors.textSecondary,
+		marginBottom: 2,
+		textAlign: 'center',
 	},
 	summaryValue: {
-		fontSize: 14,
+		fontSize: 12,
 		fontWeight: '800',
-		color: '#0F172A',
+		color: theme.colors.textPrimary,
+		textAlign: 'center',
 	},
 	lossText: {
-		color: '#16A34A',
+		color: theme.colors.accent,
 	},
 	gainText: {
-		color: '#DC2626',
+		color: theme.colors.danger,
 	},
 	hintText: {
-		marginTop: 10,
-		fontSize: 13,
-		fontWeight: '600',
-		color: '#94A3B8',
+		marginTop: theme.spacing.sm,
+		...theme.typography.body,
+		color: theme.colors.textMuted,
 	},
 	recentRow: {
 		flexDirection: 'row',
 		justifyContent: 'space-between',
 		alignItems: 'center',
-		paddingVertical: 10,
+		paddingVertical: theme.spacing.sm,
 		borderBottomWidth: 1,
-		borderBottomColor: '#E2E8F0',
+		borderBottomColor: theme.colors.border,
 	},
 	recentDate: {
-		fontSize: 14,
+		...theme.typography.body,
 		fontWeight: '700',
-		color: '#334155',
+		color: theme.colors.textSecondary,
 	},
 	recentWeight: {
-		fontSize: 14,
+		...theme.typography.body,
 		fontWeight: '800',
-		color: '#0F172A',
+		color: theme.colors.textPrimary,
 	},
 	profileHint: {
 		textAlign: 'center',
-		fontSize: 12,
-		fontWeight: '600',
-		color: '#94A3B8',
-		marginTop: 2,
+		...theme.typography.caption,
+		color: theme.colors.textMuted,
+		marginTop: theme.spacing.xs,
 	},
 });

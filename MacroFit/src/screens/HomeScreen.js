@@ -14,9 +14,19 @@ import StreakBadge from '../components/StreakBadge';
 import FoodItemCard from '../components/FoodItemCard';
 import { todayKey } from '../utils/calculations';
 import { computeWeeklyDietBudget } from '../utils/dietBudget';
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import Svg, { Circle } from 'react-native-svg';
+import { theme } from '../theme/theme';
 
-const PRIMARY = '#4F46E5';
 const MEAL_TYPES = ['Breakfast', 'Lunch', 'Dinner', 'Snacks'];
+
+const MEAL_ICONS = {
+	Breakfast: 'sunny-outline',
+	Lunch: 'restaurant-outline',
+	Dinner: 'moon-outline',
+	Snacks: 'cafe-outline',
+};
 
 const EMPTY_DAY_LOG = {
 	Breakfast: [],
@@ -66,20 +76,64 @@ export default function HomeScreen() {
 						</View>
 					</View>
 
-					<View style={styles.summaryCard}>
-						<Text style={styles.summaryMain}>
-							{Math.round(totals.cal)} / {Math.round(goalCalories)} kcal
-						</Text>
-						{remainingCalories >= 0 ? (
-							<Text style={styles.summarySub}>
-								{Math.round(remainingCalories)} kcal remaining
-							</Text>
-						) : (
-							<Text style={[styles.summarySub, styles.overText]}>
-								{Math.round(Math.abs(remainingCalories))} over
-							</Text>
-						)}
-					</View>
+					<LinearGradient
+						colors={[theme.colors.primary, theme.colors.primaryDark]}
+						start={{ x: 0, y: 0 }}
+						end={{ x: 1, y: 1 }}
+						style={styles.summaryCard}
+					>
+						<View style={styles.summaryContent}>
+							<View style={styles.summaryLeft}>
+								<Text style={styles.summaryTitle}>Today's Calories</Text>
+								<Text style={styles.summaryGoal}>
+									Goal: {Math.round(goalCalories)} kcal
+								</Text>
+								{remainingCalories >= 0 ? (
+									<Text style={styles.summarySub}>
+										{Math.round(remainingCalories)} kcal remaining
+									</Text>
+								) : (
+									<Text style={[styles.summarySub, styles.overText]}>
+										{Math.round(Math.abs(remainingCalories))} kcal over
+									</Text>
+								)}
+							</View>
+							<View style={styles.summaryRight}>
+								<Svg width={90} height={90}>
+									<Circle
+										cx="45"
+										cy="45"
+										r="36"
+										stroke="rgba(255, 255, 255, 0.2)"
+										strokeWidth="6"
+										fill="transparent"
+									/>
+									<Circle
+										cx="45"
+										cy="45"
+										r="36"
+										stroke="#FFFFFF"
+										strokeWidth="6"
+										fill="transparent"
+										strokeDasharray={`${2 * Math.PI * 36}`}
+										strokeDashoffset={
+											2 * Math.PI * 36 * (1 - Math.min(totals.cal / (goalCalories || 1), 1))
+										}
+										strokeLinecap="round"
+										rotation="-90"
+										originX="45"
+										originY="45"
+									/>
+								</Svg>
+								<View style={styles.summaryProgressTextContainer}>
+									<Text style={styles.summaryProgressNumber}>
+										{Math.round(totals.cal)}
+									</Text>
+									<Text style={styles.summaryProgressLabel}>kcal</Text>
+								</View>
+							</View>
+						</View>
+					</LinearGradient>
 
 					<View style={styles.card}>
 						<MacroProgressBar
@@ -87,24 +141,28 @@ export default function HomeScreen() {
 							current={totals.cal}
 							target={plan?.goalCalories || 0}
 							unit="kcal"
+							color={theme.colors.macroCalorie}
 						/>
 						<MacroProgressBar
 							label="Protein"
 							current={totals.protein}
 							target={plan?.proteinG || 0}
 							unit="g"
+							color={theme.colors.macroProtein}
 						/>
 						<MacroProgressBar
 							label="Carbs"
 							current={totals.carb}
 							target={plan?.carbG || 0}
 							unit="g"
+							color={theme.colors.macroCarb}
 						/>
 						<MacroProgressBar
 							label="Fat"
 							current={totals.fat}
 							target={plan?.fatG || 0}
 							unit="g"
+							color={theme.colors.macroFat}
 						/>
 					</View>
 
@@ -135,7 +193,10 @@ export default function HomeScreen() {
 						const mealItems = todayLog?.[mealType] || [];
 						return (
 							<View key={mealType} style={styles.mealSection}>
-								<Text style={styles.mealTitle}>{mealType}</Text>
+								<View style={styles.mealHeaderRow}>
+									<Ionicons name={MEAL_ICONS[mealType]} size={20} color={theme.colors.primary} />
+									<Text style={styles.mealTitle}>{mealType}</Text>
+								</View>
 								{mealItems.length === 0 ? (
 									<Text style={styles.emptyText}>No items logged</Text>
 								) : (
@@ -156,7 +217,8 @@ export default function HomeScreen() {
 					style={styles.fab}
 					onPress={() => navigation.navigate('AddFood')}
 				>
-					<Text style={styles.fabText}>+ Add Food</Text>
+					<Ionicons name="add" size={20} color="#FFFFFF" style={{ marginRight: theme.spacing.xs }} />
+					<Text style={styles.fabText}>Add Food</Text>
 				</TouchableOpacity>
 			</View>
 		</SafeAreaView>
@@ -166,141 +228,168 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
 	safeArea: {
 		flex: 1,
-		backgroundColor: '#F8FAFC',
+		backgroundColor: theme.colors.background,
 	},
 	container: {
 		flex: 1,
 	},
 	contentContainer: {
-		padding: 16,
-		paddingBottom: 96,
+		padding: theme.spacing.md,
+		paddingBottom: theme.spacing.xl * 3,
 	},
 	headerRow: {
 		flexDirection: 'row',
 		justifyContent: 'space-between',
 		alignItems: 'center',
-		marginBottom: 14,
+		marginBottom: theme.spacing.md,
 	},
 	headerActions: {
 		flexDirection: 'row',
 		alignItems: 'center',
-		gap: 10,
+		gap: theme.spacing.sm,
 	},
 	title: {
-		fontSize: 28,
-		fontWeight: '800',
-		color: '#0F172A',
+		...theme.typography.h1,
+		color: theme.colors.textPrimary,
 	},
 	weeklyButton: {
-		paddingVertical: 4,
-		paddingHorizontal: 2,
+		paddingVertical: theme.spacing.xs,
+		paddingHorizontal: theme.spacing.xs,
 	},
 	weeklyButtonText: {
-		fontSize: 13,
-		fontWeight: '800',
-		color: '#4F46E5',
+		...theme.typography.body,
+		fontWeight: '700',
+		color: theme.colors.primary,
 	},
 	summaryCard: {
-		backgroundColor: '#FFFFFF',
-		borderRadius: 16,
-		padding: 16,
-		marginBottom: 14,
-		shadowColor: '#0F172A',
-		shadowOpacity: 0.08,
-		shadowOffset: { width: 0, height: 6 },
-		shadowRadius: 12,
-		elevation: 2,
+		borderRadius: theme.radius.lg,
+		padding: theme.spacing.lg,
+		marginBottom: theme.spacing.md,
+		...theme.shadow.card,
 	},
-	summaryMain: {
-		fontSize: 28,
-		fontWeight: '800',
-		color: '#111827',
+	summaryContent: {
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+	},
+	summaryLeft: {
+		flex: 1,
+		paddingRight: theme.spacing.md,
+	},
+	summaryTitle: {
+		...theme.typography.body,
+		fontWeight: '600',
+		color: 'rgba(255, 255, 255, 0.8)',
+		marginBottom: theme.spacing.xs,
+	},
+	summaryGoal: {
+		...theme.typography.h2,
+		color: '#FFFFFF',
+		marginBottom: theme.spacing.xs,
 	},
 	summarySub: {
-		marginTop: 6,
-		fontSize: 14,
-		fontWeight: '600',
-		color: '#64748B',
+		...theme.typography.body,
+		fontWeight: '700',
+		color: '#FFFFFF',
 	},
 	overText: {
-		color: '#DC2626',
+		color: '#FCA5A5',
+	},
+	summaryRight: {
+		position: 'relative',
+		width: 90,
+		height: 90,
+		justifyContent: 'center',
+		alignItems: 'center',
+	},
+	summaryProgressTextContainer: {
+		position: 'absolute',
+		top: 0,
+		left: 0,
+		right: 0,
+		bottom: 0,
+		justifyContent: 'center',
+		alignItems: 'center',
+	},
+	summaryProgressNumber: {
+		color: '#FFFFFF',
+		...theme.typography.body,
+		fontWeight: '800',
+	},
+	summaryProgressLabel: {
+		color: 'rgba(255, 255, 255, 0.7)',
+		...theme.typography.caption,
+		fontWeight: '600',
 	},
 	card: {
-		backgroundColor: '#FFFFFF',
-		borderRadius: 16,
-		padding: 16,
-		marginBottom: 14,
-		shadowColor: '#0F172A',
-		shadowOpacity: 0.06,
-		shadowOffset: { width: 0, height: 6 },
-		shadowRadius: 10,
-		elevation: 2,
+		backgroundColor: theme.colors.surface,
+		borderRadius: theme.radius.lg,
+		padding: theme.spacing.md,
+		marginBottom: theme.spacing.md,
+		...theme.shadow.card,
 	},
 	chipRow: {
 		flexDirection: 'row',
 		flexWrap: 'wrap',
-		gap: 8,
-		marginBottom: 12,
+		gap: theme.spacing.sm,
+		marginBottom: theme.spacing.md,
 	},
 	chip: {
-		paddingHorizontal: 12,
-		paddingVertical: 8,
-		borderRadius: 999,
-		backgroundColor: '#EEF2FF',
+		paddingHorizontal: theme.spacing.md,
+		paddingVertical: theme.spacing.sm,
+		borderRadius: theme.radius.pill,
+		backgroundColor: theme.colors.primaryLight,
 		borderWidth: 1,
-		borderColor: '#C7D2FE',
+		borderColor: theme.colors.border,
 	},
 	pureVegChip: {
 		backgroundColor: '#ECFDF5',
 		borderColor: '#A7F3D0',
 	},
 	chipText: {
-		fontSize: 12,
-		fontWeight: '700',
-		color: '#3730A3',
+		...theme.typography.caption,
+		color: theme.colors.primaryDark,
 	},
 	pureVegChipText: {
 		color: '#047857',
 	},
 	mealSection: {
-		backgroundColor: '#FFFFFF',
-		borderRadius: 16,
-		padding: 14,
-		marginBottom: 12,
-		shadowColor: '#0F172A',
-		shadowOpacity: 0.05,
-		shadowOffset: { width: 0, height: 5 },
-		shadowRadius: 10,
-		elevation: 1,
+		backgroundColor: theme.colors.surface,
+		borderRadius: theme.radius.lg,
+		padding: theme.spacing.md,
+		marginBottom: theme.spacing.md,
+		...theme.shadow.card,
+	},
+	mealHeaderRow: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		marginBottom: theme.spacing.sm,
 	},
 	mealTitle: {
-		fontSize: 16,
-		fontWeight: '800',
-		color: '#1E293B',
+		...theme.typography.h3,
+		color: theme.colors.textPrimary,
+		marginLeft: theme.spacing.sm,
 	},
 	emptyText: {
-		marginTop: 8,
-		fontSize: 13,
-		color: '#94A3B8',
+		marginTop: theme.spacing.xs,
+		...theme.typography.body,
+		color: theme.colors.textMuted,
 	},
 	fab: {
 		position: 'absolute',
-		right: 16,
-		bottom: 16,
-		backgroundColor: PRIMARY,
-		borderRadius: 999,
-		paddingHorizontal: 18,
-		paddingVertical: 14,
-		shadowColor: '#312E81',
-		shadowOpacity: 0.3,
-		shadowOffset: { width: 0, height: 8 },
-		shadowRadius: 12,
-		elevation: 5,
+		right: theme.spacing.md,
+		bottom: theme.spacing.md,
+		backgroundColor: theme.colors.primary,
+		borderRadius: theme.radius.pill,
+		flexDirection: 'row',
+		alignItems: 'center',
+		paddingHorizontal: theme.spacing.lg,
+		paddingVertical: theme.spacing.md,
+		...theme.shadow.floating,
 	},
 	fabText: {
-		fontSize: 15,
-		fontWeight: '800',
+		...theme.typography.body,
+		fontWeight: '700',
 		color: '#FFFFFF',
 	},
 });
-

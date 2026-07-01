@@ -10,22 +10,22 @@ import {
 	Switch,
 	Alert,
 	Linking,
+	Platform,
 } from 'react-native';
 import { useApp } from '../context/AppContext';
 import { ACTIVITY_LEVELS, GOALS } from '../utils/calculations';
-
-const PRIMARY = '#4F46E5';
-const DANGER = '#DC2626';
+import { Ionicons } from '@expo/vector-icons';
+import { theme } from '../theme/theme';
 
 function Stepper({ value, onDecrement, onIncrement }) {
 	return (
 		<View style={styles.stepperRow}>
 			<TouchableOpacity style={styles.stepperButton} onPress={onDecrement}>
-				<Text style={styles.stepperButtonText}>-</Text>
+				<Ionicons name="remove" size={18} color={theme.colors.primary} />
 			</TouchableOpacity>
 			<Text style={styles.stepperValue}>{value}</Text>
 			<TouchableOpacity style={styles.stepperButton} onPress={onIncrement}>
-				<Text style={styles.stepperButtonText}>+</Text>
+				<Ionicons name="add" size={18} color={theme.colors.primary} />
 			</TouchableOpacity>
 		</View>
 	);
@@ -52,10 +52,20 @@ function PillRow({ items, selectedKey, onSelect }) {
 	);
 }
 
-function SectionCard({ title, children }) {
+function SectionCard({ title, icon, iconColor, children }) {
 	return (
 		<View style={styles.card}>
-			<Text style={styles.cardTitle}>{title}</Text>
+			<View style={styles.cardHeaderRow}>
+				{icon && (
+					<Ionicons
+						name={icon}
+						size={20}
+						color={iconColor || theme.colors.primary}
+						style={styles.cardHeaderIcon}
+					/>
+				)}
+				<Text style={styles.cardTitle}>{title}</Text>
+			</View>
 			{children}
 		</View>
 	);
@@ -127,7 +137,7 @@ export default function SettingsScreen() {
 					</Text>
 				) : null}
 
-				<SectionCard title="Profile">
+				<SectionCard title="Profile" icon="person-outline">
 					<Text style={styles.label}>Age</Text>
 					<TextInput
 						style={styles.input}
@@ -135,7 +145,7 @@ export default function SettingsScreen() {
 						value={age}
 						onChangeText={setAge}
 						placeholder="Age"
-						placeholderTextColor="#94A3B8"
+						placeholderTextColor={theme.colors.textMuted}
 					/>
 
 					<Text style={styles.label}>Weight (kg)</Text>
@@ -145,7 +155,7 @@ export default function SettingsScreen() {
 						value={weightKg}
 						onChangeText={setWeightKg}
 						placeholder="Weight"
-						placeholderTextColor="#94A3B8"
+						placeholderTextColor={theme.colors.textMuted}
 					/>
 
 					<Text style={styles.label}>Height (cm)</Text>
@@ -155,7 +165,7 @@ export default function SettingsScreen() {
 						value={heightCm}
 						onChangeText={setHeightCm}
 						placeholder="Height"
-						placeholderTextColor="#94A3B8"
+						placeholderTextColor={theme.colors.textMuted}
 					/>
 
 					<Text style={styles.label}>Activity Level</Text>
@@ -169,7 +179,7 @@ export default function SettingsScreen() {
 					</TouchableOpacity>
 				</SectionCard>
 
-				<SectionCard title="Diet Preferences">
+				<SectionCard title="Diet Preferences" icon="nutrition-outline">
 					<Text style={styles.label}>Diet Type</Text>
 					<View style={styles.pillRowWrap}>
 						{[
@@ -216,12 +226,17 @@ export default function SettingsScreen() {
 
 					<View style={styles.switchRow}>
 						<View style={styles.switchTextWrap}>
-							<Text style={styles.label}>Pure Veg Mode (Shravan/Navratri etc.)</Text>
+							<Text style={[styles.label, { marginTop: 0, marginBottom: 4 }]}>Pure Veg Mode (Shravan/Navratri etc.)</Text>
 							<Text style={styles.helperText}>
 								Overrides all diet rules above - forces vegetarian only
 							</Text>
 						</View>
-						<Switch value={pureVegMode} onValueChange={setPureVegMode} />
+						<Switch
+							value={pureVegMode}
+							onValueChange={setPureVegMode}
+							trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+							thumbColor={Platform.OS === 'android' ? '#FFFFFF' : undefined}
+						/>
 					</View>
 
 					<TouchableOpacity style={styles.primaryButton} onPress={saveDietPreferences}>
@@ -229,14 +244,14 @@ export default function SettingsScreen() {
 					</TouchableOpacity>
 				</SectionCard>
 
-				<SectionCard title="AI Coach Settings">
+				<SectionCard title="AI Coach Settings" icon="sparkles-outline">
 					<Text style={styles.label}>Gemini API Key</Text>
 					<TextInput
 						style={styles.input}
 						value={geminiApiKey}
 						onChangeText={setGeminiApiKey}
 						placeholder="Paste your Gemini API key"
-						placeholderTextColor="#94A3B8"
+						placeholderTextColor={theme.colors.textMuted}
 						secureTextEntry={false}
 						autoCapitalize="none"
 						autoCorrect={false}
@@ -257,7 +272,7 @@ export default function SettingsScreen() {
 					</TouchableOpacity>
 				</SectionCard>
 
-				<SectionCard title="Danger Zone">
+				<SectionCard title="Danger Zone" icon="warning-outline" iconColor={theme.colors.danger}>
 					<TouchableOpacity style={styles.dangerButton} onPress={confirmReset}>
 						<Text style={styles.dangerButtonText}>Reset All Data</Text>
 					</TouchableOpacity>
@@ -270,154 +285,150 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
 	safeArea: {
 		flex: 1,
-		backgroundColor: '#F8FAFC',
+		backgroundColor: theme.colors.background,
 	},
 	content: {
-		padding: 16,
-		paddingBottom: 28,
+		padding: theme.spacing.md,
+		paddingBottom: theme.spacing.xl,
 	},
 	title: {
-		fontSize: 30,
-		fontWeight: '800',
-		color: '#0F172A',
-		marginBottom: 4,
+		...theme.typography.h1,
+		color: theme.colors.textPrimary,
+		marginBottom: theme.spacing.xs,
 	},
 	subtitle: {
-		fontSize: 13,
-		fontWeight: '600',
-		color: '#64748B',
-		marginBottom: 14,
+		...theme.typography.caption,
+		color: theme.colors.textSecondary,
+		marginBottom: theme.spacing.md,
 	},
 	card: {
-		backgroundColor: '#FFFFFF',
-		borderRadius: 16,
-		padding: 16,
-		marginBottom: 14,
-		shadowColor: '#0F172A',
-		shadowOpacity: 0.06,
-		shadowOffset: { width: 0, height: 6 },
-		shadowRadius: 10,
-		elevation: 2,
+		backgroundColor: theme.colors.surface,
+		borderRadius: theme.radius.lg,
+		padding: theme.spacing.md,
+		marginBottom: theme.spacing.md,
+		...theme.shadow.card,
+	},
+	cardHeaderRow: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		marginBottom: theme.spacing.md,
+	},
+	cardHeaderIcon: {
+		marginRight: theme.spacing.sm,
 	},
 	cardTitle: {
-		fontSize: 18,
-		fontWeight: '800',
-		color: '#0F172A',
-		marginBottom: 12,
+		...theme.typography.h2,
+		color: theme.colors.textPrimary,
 	},
 	label: {
-		fontSize: 13,
+		...theme.typography.body,
 		fontWeight: '700',
-		color: '#334155',
-		marginBottom: 6,
+		color: theme.colors.textPrimary,
+		marginBottom: theme.spacing.xs,
+		marginTop: theme.spacing.sm,
 	},
 	input: {
 		height: 46,
-		borderRadius: 12,
+		borderRadius: theme.radius.md,
 		borderWidth: 1,
-		borderColor: '#CBD5E1',
-		paddingHorizontal: 14,
-		fontSize: 15,
-		color: '#0F172A',
-		backgroundColor: '#FFFFFF',
-		marginBottom: 12,
+		borderColor: theme.colors.border,
+		paddingHorizontal: theme.spacing.md,
+		...theme.typography.body,
+		color: theme.colors.textPrimary,
+		backgroundColor: theme.colors.surface,
+		marginBottom: theme.spacing.sm,
 	},
 	pillRow: {
-		gap: 8,
-		paddingRight: 4,
+		gap: theme.spacing.sm,
+		paddingRight: theme.spacing.xs,
 	},
 	pillRowWrap: {
 		flexDirection: 'row',
 		flexWrap: 'wrap',
-		gap: 8,
-		marginBottom: 12,
+		gap: theme.spacing.sm,
+		marginBottom: theme.spacing.sm,
 	},
 	pill: {
-		paddingHorizontal: 12,
-		paddingVertical: 9,
-		borderRadius: 999,
+		paddingHorizontal: theme.spacing.md,
+		paddingVertical: theme.spacing.sm,
+		borderRadius: theme.radius.pill,
 		borderWidth: 1,
-		borderColor: '#CBD5E1',
-		backgroundColor: '#FFFFFF',
+		borderColor: theme.colors.border,
+		backgroundColor: theme.colors.surface,
 	},
 	pillSelected: {
-		borderColor: PRIMARY,
-		backgroundColor: '#EEF2FF',
+		borderColor: theme.colors.primary,
+		backgroundColor: theme.colors.primaryLight,
 	},
 	pillText: {
-		fontSize: 13,
-		fontWeight: '700',
-		color: '#334155',
+		...theme.typography.caption,
+		color: theme.colors.textSecondary,
 	},
 	pillTextSelected: {
-		color: PRIMARY,
+		color: theme.colors.primaryDark,
+		fontWeight: '800',
 	},
 	primaryButton: {
 		height: 48,
-		borderRadius: 12,
-		backgroundColor: PRIMARY,
+		borderRadius: theme.radius.pill,
+		backgroundColor: theme.colors.primary,
 		justifyContent: 'center',
 		alignItems: 'center',
-		marginTop: 4,
+		marginTop: theme.spacing.md,
+		...theme.shadow.floating,
 	},
 	primaryButtonText: {
-		fontSize: 15,
+		...theme.typography.body,
 		fontWeight: '800',
 		color: '#FFFFFF',
 	},
 	stepperRow: {
 		flexDirection: 'row',
 		alignItems: 'center',
-		gap: 12,
-		marginBottom: 12,
+		gap: theme.spacing.md,
+		marginBottom: theme.spacing.sm,
 	},
 	stepperButton: {
-		width: 38,
-		height: 38,
-		borderRadius: 12,
-		backgroundColor: '#EEF2FF',
+		width: 36,
+		height: 36,
+		borderRadius: 18,
+		backgroundColor: theme.colors.primaryLight,
 		borderWidth: 1,
-		borderColor: '#C7D2FE',
+		borderColor: theme.colors.border,
 		justifyContent: 'center',
 		alignItems: 'center',
-	},
-	stepperButtonText: {
-		fontSize: 20,
-		lineHeight: 20,
-		fontWeight: '800',
-		color: PRIMARY,
 	},
 	stepperValue: {
 		minWidth: 40,
 		textAlign: 'center',
-		fontSize: 16,
+		...theme.typography.body,
 		fontWeight: '800',
-		color: '#0F172A',
+		color: theme.colors.textPrimary,
 	},
 	switchRow: {
 		flexDirection: 'row',
 		alignItems: 'center',
 		justifyContent: 'space-between',
-		gap: 12,
-		marginBottom: 12,
+		gap: theme.spacing.md,
+		marginBottom: theme.spacing.sm,
+		marginTop: theme.spacing.md,
 	},
 	switchTextWrap: {
 		flex: 1,
 	},
 	helperText: {
-		fontSize: 12,
-		fontWeight: '600',
-		color: '#64748B',
+		...theme.typography.caption,
+		color: theme.colors.textSecondary,
 		lineHeight: 18,
 	},
 	linkText: {
-		color: PRIMARY,
+		color: theme.colors.primary,
 		textDecorationLine: 'underline',
 		fontWeight: '700',
 	},
 	dangerButton: {
 		height: 48,
-		borderRadius: 12,
+		borderRadius: theme.radius.pill,
 		backgroundColor: '#FEE2E2',
 		justifyContent: 'center',
 		alignItems: 'center',
@@ -425,8 +436,8 @@ const styles = StyleSheet.create({
 		borderColor: '#FCA5A5',
 	},
 	dangerButtonText: {
-		fontSize: 15,
+		...theme.typography.body,
 		fontWeight: '800',
-		color: DANGER,
+		color: theme.colors.danger,
 	},
 });

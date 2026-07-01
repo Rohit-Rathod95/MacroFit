@@ -15,8 +15,8 @@ import { useApp } from '../context/AppContext';
 import { askAICoach, generateWeeklyDietPlan } from '../utils/geminiApi';
 import { computeWeeklyDietBudget } from '../utils/dietBudget';
 import { todayKey } from '../utils/calculations';
-
-const PRIMARY = '#4F46E5';
+import { Ionicons } from '@expo/vector-icons';
+import { theme } from '../theme/theme';
 
 function createMessage(role, text) {
 	return {
@@ -83,7 +83,7 @@ export default function AICoachScreen() {
 
 		appendMessage('user', userText);
 		setIsLoading(true);
-
+ 
 		try {
 			const responseText = await requestFn();
 			appendMessage('assistant', responseText);
@@ -130,6 +130,11 @@ export default function AICoachScreen() {
 		const isUser = item.role === 'user';
 		return (
 			<View style={[styles.messageRow, isUser ? styles.userRow : styles.assistantRow]}>
+				{!isUser && (
+					<View style={styles.avatarContainer}>
+						<Ionicons name="barbell-outline" size={16} color={theme.colors.primary} />
+					</View>
+				)}
 				<View style={[styles.bubble, isUser ? styles.userBubble : styles.assistantBubble]}>
 					<Text style={[styles.messageText, isUser ? styles.userText : styles.assistantText]}>
 						{item.text}
@@ -157,8 +162,11 @@ export default function AICoachScreen() {
 						ListFooterComponent={
 							isLoading ? (
 								<View style={[styles.messageRow, styles.assistantRow]}>
+									<View style={styles.avatarContainer}>
+										<Ionicons name="barbell-outline" size={16} color={theme.colors.primary} />
+									</View>
 									<View style={[styles.bubble, styles.assistantBubble, styles.loadingBubble]}>
-										<ActivityIndicator size="small" color={PRIMARY} />
+										<ActivityIndicator size="small" color={theme.colors.primary} />
 									</View>
 								</View>
 							) : null
@@ -171,14 +179,15 @@ export default function AICoachScreen() {
 							onPress={generatePlan}
 							disabled={isLoading}
 						>
-							<Text style={styles.planButtonText}>📅 Generate Weekly Plan</Text>
+							<Ionicons name="calendar-outline" size={16} color={theme.colors.primary} style={{ marginRight: 6 }} />
+							<Text style={styles.planButtonText}>Generate Weekly Plan</Text>
 						</TouchableOpacity>
 
 						<View style={styles.inputRow}>
 							<TextInput
 								style={styles.input}
 								placeholder="Ask your coach..."
-								placeholderTextColor="#94A3B8"
+								placeholderTextColor={theme.colors.textMuted}
 								value={inputText}
 								onChangeText={setInputText}
 								editable={!isLoading}
@@ -206,66 +215,68 @@ export default function AICoachScreen() {
 const styles = StyleSheet.create({
 	safeArea: {
 		flex: 1,
-		backgroundColor: '#F8FAFC',
+		backgroundColor: theme.colors.background,
 	},
 	container: {
 		flex: 1,
 	},
 	listContent: {
-		padding: 16,
-		paddingBottom: 8,
+		padding: theme.spacing.md,
+		paddingBottom: theme.spacing.sm,
 	},
 	composerWrap: {
-		paddingHorizontal: 16,
-		paddingBottom: 16,
-		paddingTop: 8,
+		paddingHorizontal: theme.spacing.md,
+		paddingBottom: theme.spacing.md,
+		paddingTop: theme.spacing.sm,
 		borderTopWidth: 1,
-		borderTopColor: '#E2E8F0',
-		backgroundColor: '#F8FAFC',
+		borderTopColor: theme.colors.border,
+		backgroundColor: theme.colors.background,
 	},
 	planButton: {
-		height: 46,
-		borderRadius: 12,
-		backgroundColor: '#EEF2FF',
+		height: 40,
+		borderRadius: theme.radius.pill,
+		backgroundColor: 'transparent',
 		borderWidth: 1,
-		borderColor: '#C7D2FE',
+		borderColor: theme.colors.primary,
+		flexDirection: 'row',
 		justifyContent: 'center',
 		alignItems: 'center',
-		marginBottom: 10,
+		marginBottom: theme.spacing.sm,
 	},
 	planButtonText: {
-		fontSize: 14,
+		...theme.typography.caption,
 		fontWeight: '800',
-		color: PRIMARY,
+		color: theme.colors.primary,
 	},
 	inputRow: {
 		flexDirection: 'row',
 		alignItems: 'flex-end',
-		gap: 10,
+		gap: theme.spacing.sm,
 	},
 	input: {
 		flex: 1,
 		minHeight: 48,
 		maxHeight: 110,
-		borderRadius: 12,
+		borderRadius: theme.radius.md,
 		borderWidth: 1,
-		borderColor: '#CBD5E1',
-		paddingHorizontal: 14,
-		paddingVertical: 12,
-		fontSize: 15,
-		color: '#0F172A',
-		backgroundColor: '#FFFFFF',
+		borderColor: theme.colors.border,
+		paddingHorizontal: theme.spacing.md,
+		paddingVertical: theme.spacing.sm,
+		...theme.typography.body,
+		color: theme.colors.textPrimary,
+		backgroundColor: theme.colors.surface,
 	},
 	sendButton: {
 		height: 48,
-		paddingHorizontal: 16,
-		borderRadius: 12,
-		backgroundColor: PRIMARY,
+		paddingHorizontal: theme.spacing.md,
+		borderRadius: theme.radius.md,
+		backgroundColor: theme.colors.primary,
 		justifyContent: 'center',
 		alignItems: 'center',
+		...theme.shadow.card,
 	},
 	sendButtonText: {
-		fontSize: 14,
+		...theme.typography.body,
 		fontWeight: '800',
 		color: '#FFFFFF',
 	},
@@ -273,8 +284,9 @@ const styles = StyleSheet.create({
 		opacity: 0.5,
 	},
 	messageRow: {
-		marginBottom: 10,
+		marginBottom: theme.spacing.sm,
 		flexDirection: 'row',
+		alignItems: 'flex-end',
 	},
 	userRow: {
 		justifyContent: 'flex-end',
@@ -282,19 +294,34 @@ const styles = StyleSheet.create({
 	assistantRow: {
 		justifyContent: 'flex-start',
 	},
-	bubble: {
-		maxWidth: '82%',
-		paddingHorizontal: 14,
-		paddingVertical: 12,
+	avatarContainer: {
+		width: 32,
+		height: 32,
 		borderRadius: 16,
+		backgroundColor: theme.colors.primaryLight,
+		justifyContent: 'center',
+		alignItems: 'center',
+		marginRight: theme.spacing.sm,
+		alignSelf: 'flex-end',
+		borderWidth: 1,
+		borderColor: theme.colors.border,
+	},
+	bubble: {
+		maxWidth: '75%',
+		paddingHorizontal: theme.spacing.md,
+		paddingVertical: theme.spacing.sm,
+		borderRadius: theme.radius.lg,
+		...theme.shadow.card,
 	},
 	userBubble: {
-		backgroundColor: PRIMARY,
-		borderBottomRightRadius: 6,
+		backgroundColor: theme.colors.primary,
+		borderBottomRightRadius: theme.radius.sm,
 	},
 	assistantBubble: {
-		backgroundColor: '#F1F5F9',
-		borderBottomLeftRadius: 6,
+		backgroundColor: theme.colors.surface,
+		borderWidth: 1,
+		borderColor: theme.colors.border,
+		borderBottomLeftRadius: theme.radius.sm,
 	},
 	loadingBubble: {
 		minWidth: 56,
@@ -302,14 +329,13 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 	},
 	messageText: {
-		fontSize: 14,
+		...theme.typography.body,
 		lineHeight: 20,
-		fontWeight: '600',
 	},
 	userText: {
 		color: '#FFFFFF',
 	},
 	assistantText: {
-		color: '#0F172A',
+		color: theme.colors.textPrimary,
 	},
 });

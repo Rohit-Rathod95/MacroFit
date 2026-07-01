@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { theme } from '../theme/theme';
 
 export default function FoodItemCard({ item, onDelete }) {
 	const quantity = Number(item?.quantity);
@@ -29,12 +30,13 @@ export default function FoodItemCard({ item, onDelete }) {
 
 const styles = StyleSheet.create({
 	card: {
-		backgroundColor: '#FFFFFF',
-		borderRadius: 12,
+		backgroundColor: theme.colors.surface,
+		borderRadius: theme.radius.lg,
 		borderWidth: 1,
-		borderColor: '#E2E8F0',
-		padding: 12,
-		marginTop: 8,
+		borderColor: theme.colors.border,
+		padding: theme.spacing.md,
+		marginTop: theme.spacing.sm,
+		...theme.shadow.card,
 	},
 	topRow: {
 		flexDirection: 'row',
@@ -43,33 +45,33 @@ const styles = StyleSheet.create({
 	},
 	nameWrap: {
 		flex: 1,
-		paddingRight: 8,
+		paddingRight: theme.spacing.sm,
 	},
 	name: {
-		fontSize: 14,
+		...theme.typography.body,
 		fontWeight: '700',
-		color: '#0F172A',
+		color: theme.colors.textPrimary,
 	},
 	meta: {
-		marginTop: 2,
-		fontSize: 12,
-		color: '#64748B',
+		marginTop: theme.spacing.xs,
+		...theme.typography.caption,
+		color: theme.colors.textSecondary,
 	},
 	deleteButton: {
-		paddingVertical: 5,
-		paddingHorizontal: 9,
-		borderRadius: 8,
+		paddingVertical: theme.spacing.xs,
+		paddingHorizontal: theme.spacing.sm,
+		borderRadius: theme.radius.sm,
 		backgroundColor: '#FEE2E2',
 	},
 	deleteText: {
-		fontSize: 12,
+		...theme.typography.caption,
 		fontWeight: '700',
-		color: '#B91C1C',
+		color: theme.colors.danger,
 	},
 	macros: {
-		marginTop: 8,
-		fontSize: 12,
+		marginTop: theme.spacing.sm,
+		...theme.typography.caption,
 		fontWeight: '600',
-		color: '#334155',
+		color: theme.colors.textSecondary,
 	},
 });

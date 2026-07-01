@@ -12,19 +12,23 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { useApp } from '../context/AppContext';
 import { searchFoods, scaleFood } from '../utils/foodDatabase';
 import { allowedDietTypesForToday } from '../utils/dietBudget';
+import { Ionicons } from '@expo/vector-icons';
+import { theme } from '../theme/theme';
 
-const PRIMARY = '#4F46E5';
 const MEAL_TYPES = ['Breakfast', 'Lunch', 'Dinner', 'Snacks'];
 
-function dietEmoji(dietType) {
-	if (dietType === 'egg') {
-		return '🥚';
-	}
-	if (dietType === 'nonveg') {
-		return '🔴';
-	}
-	return '🟢';
-}
+const MEAL_ICONS = {
+	Breakfast: 'sunny-outline',
+	Lunch: 'restaurant-outline',
+	Dinner: 'moon-outline',
+	Snacks: 'cafe-outline',
+};
+
+const DIET_COLORS = {
+	veg: theme.colors.accent,
+	egg: theme.colors.warning,
+	nonveg: theme.colors.danger,
+};
 
 function unitLabel(unit) {
 	if (unit === 'g') {
@@ -89,13 +93,16 @@ export default function AddFoodScreen() {
 				<View style={styles.container}>
 					<Text style={styles.title}>Add Food</Text>
 
-					<TextInput
-						style={styles.searchInput}
-						placeholder="Search food..."
-						placeholderTextColor="#94A3B8"
-						value={searchQuery}
-						onChangeText={setSearchQuery}
-					/>
+					<View style={styles.searchContainer}>
+						<Ionicons name="search-outline" size={18} color={theme.colors.textMuted} style={styles.searchIcon} />
+						<TextInput
+							style={styles.searchInput}
+							placeholder="Search food..."
+							placeholderTextColor={theme.colors.textMuted}
+							value={searchQuery}
+							onChangeText={setSearchQuery}
+						/>
+					</View>
 
 					<View style={styles.dietRuleRow}>
 						<Text style={styles.dietRuleText}>
@@ -117,15 +124,17 @@ export default function AddFoodScreen() {
 						contentContainerStyle={styles.listContent}
 						renderItem={({ item }) => (
 							<TouchableOpacity
-								style={styles.foodRow}
+								style={[
+									styles.foodRow,
+									{ borderLeftColor: DIET_COLORS[item.dietType] || theme.colors.accent }
+								]}
 								onPress={() => onSelectFood(item)}
 							>
 								<Text style={styles.foodTitle}>
-									{dietEmoji(item.dietType)} {item.name}
+									{item.name}
 								</Text>
 								<Text style={styles.foodSubtitle}>
-									{item.cal} kcal per {item.per}
-									{item.unit}
+									{item.cal} kcal per {item.per}{item.unit}
 								</Text>
 							</TouchableOpacity>
 						)}
@@ -162,7 +171,7 @@ export default function AddFoodScreen() {
 							value={quantity}
 							onChangeText={setQuantity}
 							placeholder="Enter quantity"
-							placeholderTextColor="#94A3B8"
+							placeholderTextColor={theme.colors.textMuted}
 						/>
 						<Text style={styles.unitText}>{unitLabel(selectedFood.unit)}</Text>
 					</View>
@@ -170,11 +179,38 @@ export default function AddFoodScreen() {
 
 				<View style={styles.card}>
 					<Text style={styles.label}>Live Preview</Text>
-					<View style={styles.previewGrid}>
-						<Text style={styles.previewItem}>Calories: {Math.round(scaled?.cal || 0)} kcal</Text>
-						<Text style={styles.previewItem}>Protein: {Math.round(scaled?.protein || 0)} g</Text>
-						<Text style={styles.previewItem}>Carbs: {Math.round(scaled?.carb || 0)} g</Text>
-						<Text style={styles.previewItem}>Fat: {Math.round(scaled?.fat || 0)} g</Text>
+					<View style={styles.previewRow}>
+						<View style={[styles.statChip, { backgroundColor: theme.colors.macroCalorie + '15', borderColor: theme.colors.macroCalorie }]}>
+							<Ionicons name="flame-outline" size={16} color={theme.colors.macroCalorie} />
+							<Text style={[styles.statValue, { color: theme.colors.macroCalorie }]}>
+								{Math.round(scaled?.cal || 0)}
+							</Text>
+							<Text style={styles.statLabel}>kcal</Text>
+						</View>
+
+						<View style={[styles.statChip, { backgroundColor: theme.colors.macroProtein + '15', borderColor: theme.colors.macroProtein }]}>
+							<Ionicons name="barbell-outline" size={16} color={theme.colors.macroProtein} />
+							<Text style={[styles.statValue, { color: theme.colors.macroProtein }]}>
+								{Math.round(scaled?.protein || 0)}g
+							</Text>
+							<Text style={styles.statLabel}>protein</Text>
+						</View>
+
+						<View style={[styles.statChip, { backgroundColor: theme.colors.macroCarb + '15', borderColor: theme.colors.macroCarb }]}>
+							<Ionicons name="leaf-outline" size={16} color={theme.colors.macroCarb} />
+							<Text style={[styles.statValue, { color: theme.colors.macroCarb }]}>
+								{Math.round(scaled?.carb || 0)}g
+							</Text>
+							<Text style={styles.statLabel}>carbs</Text>
+						</View>
+
+						<View style={[styles.statChip, { backgroundColor: theme.colors.macroFat + '15', borderColor: theme.colors.macroFat }]}>
+							<Ionicons name="water-outline" size={16} color={theme.colors.macroFat} />
+							<Text style={[styles.statValue, { color: theme.colors.macroFat }]}>
+								{Math.round(scaled?.fat || 0)}g
+							</Text>
+							<Text style={styles.statLabel}>fat</Text>
+						</View>
 					</View>
 				</View>
 
@@ -189,6 +225,12 @@ export default function AddFoodScreen() {
 									style={[styles.mealPill, selected && styles.mealPillSelected]}
 									onPress={() => setSelectedMealType(meal)}
 								>
+									<Ionicons
+										name={MEAL_ICONS[meal]}
+										size={14}
+										color={selected ? '#FFFFFF' : theme.colors.primary}
+										style={{ marginRight: 6 }}
+									/>
 									<Text
 										style={[styles.mealPillText, selected && styles.mealPillTextSelected]}
 									>
@@ -215,104 +257,103 @@ export default function AddFoodScreen() {
 const styles = StyleSheet.create({
 	safeArea: {
 		flex: 1,
-		backgroundColor: '#F8FAFC',
+		backgroundColor: theme.colors.background,
 	},
 	container: {
 		flex: 1,
-		padding: 16,
+		padding: theme.spacing.md,
 	},
 	title: {
-		fontSize: 24,
-		fontWeight: '800',
-		color: '#0F172A',
-		marginBottom: 12,
+		...theme.typography.h1,
+		color: theme.colors.textPrimary,
+		marginBottom: theme.spacing.md,
+	},
+	searchContainer: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		borderRadius: theme.radius.md,
+		borderWidth: 1,
+		borderColor: theme.colors.border,
+		backgroundColor: theme.colors.surface,
+		paddingHorizontal: theme.spacing.md,
+		height: 48,
+	},
+	searchIcon: {
+		marginRight: theme.spacing.sm,
 	},
 	searchInput: {
-		height: 48,
-		borderRadius: 12,
-		borderWidth: 1,
-		borderColor: '#CBD5E1',
-		backgroundColor: '#FFFFFF',
-		paddingHorizontal: 14,
-		fontSize: 15,
-		color: '#0F172A',
+		flex: 1,
+		height: '100%',
+		...theme.typography.body,
+		color: theme.colors.textPrimary,
 	},
 	dietRuleRow: {
-		marginTop: 10,
-		marginBottom: 8,
+		marginTop: theme.spacing.sm,
+		marginBottom: theme.spacing.sm,
 	},
 	dietRuleText: {
-		fontSize: 12,
-		fontWeight: '600',
-		color: '#64748B',
+		...theme.typography.caption,
+		color: theme.colors.textSecondary,
 	},
 	dietToggleButton: {
-		marginTop: 6,
+		marginTop: theme.spacing.xs,
 		alignSelf: 'flex-start',
-		paddingVertical: 6,
-		paddingHorizontal: 10,
-		borderRadius: 999,
-		backgroundColor: '#EEF2FF',
+		paddingVertical: theme.spacing.xs,
+		paddingHorizontal: theme.spacing.sm,
+		borderRadius: theme.radius.pill,
+		backgroundColor: theme.colors.primaryLight,
 	},
 	dietToggleText: {
-		fontSize: 12,
+		...theme.typography.caption,
 		fontWeight: '700',
-		color: PRIMARY,
+		color: theme.colors.primary,
 	},
 	listContent: {
-		paddingBottom: 20,
+		paddingBottom: theme.spacing.lg,
 	},
 	foodRow: {
-		backgroundColor: '#FFFFFF',
-		borderRadius: 14,
-		padding: 14,
-		marginTop: 8,
-		shadowColor: '#0F172A',
-		shadowOpacity: 0.05,
-		shadowOffset: { width: 0, height: 4 },
-		shadowRadius: 8,
-		elevation: 1,
+		backgroundColor: theme.colors.surface,
+		borderRadius: theme.radius.md,
+		borderLeftWidth: 4,
+		padding: theme.spacing.md,
+		marginTop: theme.spacing.sm,
+		...theme.shadow.card,
 	},
 	foodTitle: {
-		fontSize: 15,
+		...theme.typography.body,
 		fontWeight: '700',
-		color: '#0F172A',
+		color: theme.colors.textPrimary,
 	},
 	foodSubtitle: {
-		marginTop: 4,
-		fontSize: 13,
-		color: '#64748B',
+		marginTop: theme.spacing.xs,
+		...theme.typography.caption,
+		color: theme.colors.textSecondary,
 	},
 	emptyText: {
-		marginTop: 20,
-		fontSize: 14,
-		color: '#94A3B8',
+		marginTop: theme.spacing.lg,
+		...theme.typography.body,
+		color: theme.colors.textMuted,
 		textAlign: 'center',
 	},
 	backButton: {
-		marginBottom: 10,
+		marginBottom: theme.spacing.sm,
 	},
 	backButtonText: {
-		fontSize: 14,
+		...theme.typography.body,
 		fontWeight: '700',
-		color: PRIMARY,
+		color: theme.colors.primary,
 	},
 	card: {
-		backgroundColor: '#FFFFFF',
-		borderRadius: 14,
-		padding: 14,
-		marginBottom: 12,
-		shadowColor: '#0F172A',
-		shadowOpacity: 0.05,
-		shadowOffset: { width: 0, height: 4 },
-		shadowRadius: 8,
-		elevation: 1,
+		backgroundColor: theme.colors.surface,
+		borderRadius: theme.radius.lg,
+		padding: theme.spacing.md,
+		marginBottom: theme.spacing.md,
+		...theme.shadow.card,
 	},
 	label: {
-		fontSize: 14,
-		fontWeight: '700',
-		color: '#334155',
-		marginBottom: 8,
+		...theme.typography.h3,
+		color: theme.colors.textPrimary,
+		marginBottom: theme.spacing.sm,
 	},
 	quantityRow: {
 		flexDirection: 'row',
@@ -321,65 +362,84 @@ const styles = StyleSheet.create({
 	quantityInput: {
 		flex: 1,
 		height: 46,
-		borderRadius: 10,
+		borderRadius: theme.radius.md,
 		borderWidth: 1,
-		borderColor: '#CBD5E1',
-		paddingHorizontal: 12,
-		fontSize: 15,
-		color: '#0F172A',
-		backgroundColor: '#FFFFFF',
+		borderColor: theme.colors.border,
+		paddingHorizontal: theme.spacing.md,
+		...theme.typography.body,
+		color: theme.colors.textPrimary,
+		backgroundColor: theme.colors.surface,
 	},
 	unitText: {
-		marginLeft: 10,
-		fontSize: 14,
-		fontWeight: '600',
-		color: '#475569',
+		marginLeft: theme.spacing.sm,
+		...theme.typography.body,
+		fontWeight: '700',
+		color: theme.colors.textSecondary,
 	},
-	previewGrid: {
+	previewRow: {
+		flexDirection: 'row',
+		justifyContent: 'space-between',
 		gap: 6,
 	},
-	previewItem: {
-		fontSize: 14,
-		fontWeight: '600',
-		color: '#1E293B',
+	statChip: {
+		flex: 1,
+		alignItems: 'center',
+		paddingVertical: theme.spacing.sm,
+		paddingHorizontal: theme.spacing.xs,
+		borderRadius: theme.radius.md,
+		borderWidth: 1,
+	},
+	statValue: {
+		...theme.typography.caption,
+		fontWeight: '800',
+		marginTop: 4,
+	},
+	statLabel: {
+		fontSize: 9,
+		fontWeight: '700',
+		color: theme.colors.textSecondary,
+		textTransform: 'uppercase',
+		marginTop: 2,
 	},
 	mealPillRow: {
 		flexDirection: 'row',
 		flexWrap: 'wrap',
-		gap: 8,
+		gap: theme.spacing.sm,
 	},
 	mealPill: {
-		paddingVertical: 8,
-		paddingHorizontal: 12,
-		borderRadius: 999,
-		backgroundColor: '#EEF2FF',
+		flexDirection: 'row',
+		alignItems: 'center',
+		paddingVertical: theme.spacing.sm,
+		paddingHorizontal: theme.spacing.md,
+		borderRadius: theme.radius.pill,
+		backgroundColor: theme.colors.primaryLight,
 	},
 	mealPillSelected: {
-		backgroundColor: PRIMARY,
+		backgroundColor: theme.colors.primary,
 	},
 	mealPillText: {
-		fontSize: 13,
+		...theme.typography.caption,
 		fontWeight: '700',
-		color: '#3730A3',
+		color: theme.colors.primaryDark,
 	},
 	mealPillTextSelected: {
 		color: '#FFFFFF',
 	},
 	addButton: {
 		height: 50,
-		borderRadius: 12,
-		backgroundColor: PRIMARY,
+		borderRadius: theme.radius.pill,
+		backgroundColor: theme.colors.primary,
 		justifyContent: 'center',
 		alignItems: 'center',
 		marginTop: 'auto',
+		...theme.shadow.floating,
 	},
 	addButtonDisabled: {
 		opacity: 0.5,
 	},
 	addButtonText: {
-		fontSize: 16,
+		...theme.typography.body,
 		fontWeight: '800',
 		color: '#FFFFFF',
 	},
 });
-

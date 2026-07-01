@@ -9,8 +9,9 @@ import {
 import { useApp } from '../context/AppContext';
 import { getWeekDateKeys, computeWeeklyDietBudget } from '../utils/dietBudget';
 import { todayKey } from '../utils/calculations';
+import Svg, { Circle } from 'react-native-svg';
+import { theme } from '../theme/theme';
 
-const PRIMARY = '#4F46E5';
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 function buildTotals(dayLog) {
@@ -191,15 +192,45 @@ export default function WeeklySummaryScreen() {
 				<View style={styles.card}>
 					<Text style={styles.cardTitle}>Calorie Adherence</Text>
 					{summary.daysLoggedCount === 0 ? (
-						<Text style={[styles.adherenceMessage, { color: adherenceMessage.color }]}>
+						<Text style={[styles.adherenceMessageText, { color: adherenceMessage.color }]}>
 							{adherenceMessage.text}
 						</Text>
 					) : (
-						<View>
-							<Text style={[styles.adherencePct, { color: adherenceMessage.color }]}>
-								{summary.adherencePct}%
-							</Text>
-							<Text style={[styles.adherenceMessage, { color: adherenceMessage.color }]}>
+						<View style={styles.adherenceContainer}>
+							<View style={styles.adherenceRingContainer}>
+								<Svg width={120} height={120}>
+									<Circle
+										cx="60"
+										cy="60"
+										r="48"
+										stroke={theme.colors.border}
+										strokeWidth="8"
+										fill="transparent"
+									/>
+									<Circle
+										cx="60"
+										cy="60"
+										r="48"
+										stroke={adherenceMessage.color}
+										strokeWidth="8"
+										fill="transparent"
+										strokeDasharray={`${2 * Math.PI * 48}`}
+										strokeDashoffset={
+											2 * Math.PI * 48 * (1 - Math.min(summary.adherencePct / 100, 1))
+										}
+										strokeLinecap="round"
+										rotation="-90"
+										originX="60"
+										originY="60"
+									/>
+								</Svg>
+								<View style={styles.adherenceTextContainer}>
+									<Text style={[styles.adherencePctText, { color: adherenceMessage.color }]}>
+										{summary.adherencePct}%
+									</Text>
+								</View>
+							</View>
+							<Text style={[styles.adherenceMessageText, { color: adherenceMessage.color }]}>
 								{adherenceMessage.text}
 							</Text>
 						</View>
@@ -233,7 +264,17 @@ export default function WeeklySummaryScreen() {
 					{weeklyData.map((day) => (
 						<View key={day.dateKey} style={styles.dayRow}>
 							<View style={styles.dayLeft}>
-								<View style={[styles.dot, { backgroundColor: day.state.color }]} />
+								<View style={styles.verticalBarTrack}>
+									<View
+										style={[
+											styles.verticalBarFill,
+											{
+												height: `${(plan?.goalCalories > 0 ? Math.min(day.totals.cal / plan.goalCalories, 1) : 0) * 100}%`,
+												backgroundColor: day.state.color,
+											},
+										]}
+									/>
+								</View>
 								<View>
 									<Text style={styles.dayName}>{day.dayName}</Text>
 									<Text style={styles.dayDate}>{day.isToday ? 'Today' : day.dateKey}</Text>
@@ -251,85 +292,98 @@ export default function WeeklySummaryScreen() {
 const styles = StyleSheet.create({
 	safeArea: {
 		flex: 1,
-		backgroundColor: '#F8FAFC',
+		backgroundColor: theme.colors.background,
 	},
 	content: {
-		padding: 16,
-		paddingBottom: 28,
+		padding: theme.spacing.md,
+		paddingBottom: theme.spacing.xl,
 	},
 	title: {
-		fontSize: 30,
-		fontWeight: '800',
-		color: '#0F172A',
-		marginBottom: 16,
+		...theme.typography.h1,
+		color: theme.colors.textPrimary,
+		marginBottom: theme.spacing.md,
 	},
 	card: {
-		backgroundColor: '#FFFFFF',
-		borderRadius: 16,
-		padding: 16,
-		marginBottom: 14,
-		shadowColor: '#0F172A',
-		shadowOpacity: 0.06,
-		shadowOffset: { width: 0, height: 6 },
-		shadowRadius: 10,
-		elevation: 2,
+		backgroundColor: theme.colors.surface,
+		borderRadius: theme.radius.lg,
+		padding: theme.spacing.md,
+		marginBottom: theme.spacing.md,
+		...theme.shadow.card,
 	},
 	cardTitle: {
-		fontSize: 18,
-		fontWeight: '800',
-		color: '#0F172A',
-		marginBottom: 12,
+		...theme.typography.h2,
+		color: theme.colors.textPrimary,
+		marginBottom: theme.spacing.sm,
 	},
 	metricGrid: {
 		flexDirection: 'row',
 		flexWrap: 'wrap',
-		gap: 10,
+		gap: theme.spacing.sm,
 	},
 	metricCard: {
 		width: '48%',
-		padding: 12,
-		borderRadius: 12,
-		backgroundColor: '#F8FAFC',
+		padding: theme.spacing.sm,
+		borderRadius: theme.radius.md,
+		backgroundColor: theme.colors.primaryLight,
 		borderWidth: 1,
-		borderColor: '#E2E8F0',
+		borderColor: theme.colors.border,
 	},
 	metricLabel: {
-		fontSize: 12,
-		fontWeight: '700',
-		color: '#64748B',
-		marginBottom: 6,
+		...theme.typography.caption,
+		color: theme.colors.textSecondary,
+		marginBottom: theme.spacing.xs,
 	},
 	metricValue: {
-		fontSize: 15,
+		...theme.typography.body,
 		fontWeight: '800',
-		color: '#0F172A',
+		color: theme.colors.textPrimary,
 	},
 	daysLoggedText: {
-		marginTop: 12,
-		fontSize: 13,
-		fontWeight: '600',
-		color: '#64748B',
+		marginTop: theme.spacing.sm,
+		...theme.typography.caption,
+		color: theme.colors.textSecondary,
 	},
-	adherencePct: {
-		fontSize: 40,
+	adherenceContainer: {
+		alignItems: 'center',
+		justifyContent: 'center',
+		paddingVertical: theme.spacing.sm,
+	},
+	adherenceRingContainer: {
+		position: 'relative',
+		width: 120,
+		height: 120,
+		justifyContent: 'center',
+		alignItems: 'center',
+		marginBottom: theme.spacing.md,
+	},
+	adherenceTextContainer: {
+		position: 'absolute',
+		top: 0,
+		left: 0,
+		right: 0,
+		bottom: 0,
+		justifyContent: 'center',
+		alignItems: 'center',
+	},
+	adherencePctText: {
+		fontSize: 24,
 		fontWeight: '900',
-		color: PRIMARY,
 	},
-	adherenceMessage: {
-		marginTop: 4,
-		fontSize: 14,
+	adherenceMessageText: {
+		...theme.typography.body,
 		fontWeight: '700',
+		textAlign: 'center',
 	},
 	vegModeText: {
-		fontSize: 14,
+		...theme.typography.body,
 		fontWeight: '700',
 		color: '#047857',
 	},
 	budgetWrap: {
-		gap: 12,
+		gap: theme.spacing.sm,
 	},
 	budgetItem: {
-		gap: 8,
+		gap: theme.spacing.xs,
 	},
 	budgetHeaderRow: {
 		flexDirection: 'row',
@@ -337,53 +391,59 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 	},
 	budgetLabel: {
-		fontSize: 13,
+		...theme.typography.body,
 		fontWeight: '700',
-		color: '#334155',
+		color: theme.colors.textSecondary,
 	},
 	barTrack: {
 		height: 10,
-		borderRadius: 999,
-		backgroundColor: '#E2E8F0',
+		borderRadius: theme.radius.pill,
+		backgroundColor: theme.colors.border,
 		overflow: 'hidden',
 	},
 	barFill: {
 		height: '100%',
-		backgroundColor: PRIMARY,
-		borderRadius: 999,
+		backgroundColor: theme.colors.primary,
+		borderRadius: theme.radius.pill,
 	},
 	dayRow: {
 		flexDirection: 'row',
 		justifyContent: 'space-between',
 		alignItems: 'center',
-		paddingVertical: 12,
+		paddingVertical: theme.spacing.sm,
 		borderBottomWidth: 1,
-		borderBottomColor: '#E2E8F0',
+		borderBottomColor: theme.colors.border,
 	},
 	dayLeft: {
 		flexDirection: 'row',
 		alignItems: 'center',
-		gap: 10,
+		gap: theme.spacing.sm,
 	},
-	dot: {
-		width: 10,
-		height: 10,
-		borderRadius: 5,
+	verticalBarTrack: {
+		width: 8,
+		height: 36,
+		borderRadius: 4,
+		backgroundColor: theme.colors.border,
+		justifyContent: 'flex-end',
+		overflow: 'hidden',
+	},
+	verticalBarFill: {
+		width: '100%',
+		borderRadius: 4,
 	},
 	dayName: {
-		fontSize: 14,
+		...theme.typography.body,
 		fontWeight: '800',
-		color: '#0F172A',
+		color: theme.colors.textPrimary,
 	},
 	dayDate: {
-		fontSize: 12,
-		fontWeight: '600',
-		color: '#94A3B8',
+		...theme.typography.caption,
+		color: theme.colors.textSecondary,
 		marginTop: 2,
 	},
 	dayCalories: {
-		fontSize: 14,
+		...theme.typography.body,
 		fontWeight: '800',
-		color: '#0F172A',
+		color: theme.colors.textPrimary,
 	},
 });
